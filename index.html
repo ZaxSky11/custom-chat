@@ -2,31 +2,37 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Twitch-Chat Overlay</title>
+  <title>Twitch Chat Overlay – Testversion</title>
   <style>
     body {
       margin: 0;
-      overflow: hidden;
-      background: transparent;
+      background: rgba(0, 0, 0, 0.1); /* halbtransparenter Testhintergrund */
       font-family: Arial, sans-serif;
+      overflow: hidden;
     }
+
     #chat {
       position: absolute;
-      bottom: 10%;
-      left: 5%;
+      bottom: 20px;
+      left: 20px;
       display: flex;
       flex-direction: column-reverse;
       gap: 12px;
+      max-height: 90vh;
+      overflow-y: hidden;
     }
+
     .bubble {
-      background: rgba(244, 205, 208, 0.9);
+      background: rgba(244, 205, 208, 0.9); /* deine Wunschfarbe */
       padding: 10px 16px;
       border-radius: 24px;
-      max-width: 300px;
-      font-size: 16px;
+      max-width: 500px;
+      font-size: 18px;
       color: #000;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
       animation: fadeIn 0.3s ease-out;
     }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -34,27 +40,32 @@
   </style>
 </head>
 <body>
-  <div id="chat"></div>
+  <div id="chat">
+    <div class="bubble">👋 Testnachricht: Overlay funktioniert!</div>
+  </div>
 
   <script src="https://unpkg.com/tmi.js@1.8.5/dist/tmi.min.js"></script>
   <script>
     const client = new tmi.Client({
       connection: { reconnect: true },
-      channels: ['zaxskyvt']
+      channels: ['zaxskyvt'] // ← dein Twitch-Name
     });
+
     client.connect();
 
     const chat = document.getElementById('chat');
-    function add(username, message) {
-      const b = document.createElement('div');
-      b.className = 'bubble';
-      b.textContent = username + ': ' + message;
-      chat.appendChild(b);
-      setTimeout(() => b.remove(), 12000);
+
+    function addMessage(user, message) {
+      const msg = document.createElement('div');
+      msg.className = 'bubble';
+      msg.textContent = `${user}: ${message}`;
+      chat.appendChild(msg);
+      setTimeout(() => msg.remove(), 15000); // 15 Sekunden sichtbar
     }
-    client.on('message', (_, tags, msg, self) => {
-      if(self) return;
-      add(tags['display-name'] || tags['username'], msg);
+
+    client.on('message', (_, tags, message, self) => {
+      if (self) return;
+      addMessage(tags['display-name'] || tags['username'], message);
     });
   </script>
 </body>
